@@ -68,7 +68,8 @@ export const IS_OCULUS = /OculusBrowser/.test(navigator.userAgent);
 export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
 export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
 
-export const IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_FIREFOX && !IS_OCULUS;
+export var IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_OCULUS;
+IS_SCENEVIEWER_CANDIDATE = IS_SCENEVIEWER_CANDIDATE || IS_FIREFOX;
 
 // Extend Window type with webkit property,
 // required to check if iOS is running within a WKWebView browser instance.
@@ -90,7 +91,8 @@ export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
             const tempAnchor = document.createElement('a');
             return Boolean(tempAnchor.relList && tempAnchor.relList.supports && tempAnchor.relList.supports('ar'));
         } else {
-            return  Boolean(/CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent));
+            return Boolean(/CriOS\/|EdgiOS\/|FxiOS\/|YaBrowser\/|Mozilla\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent));
+
         }
     } else {
         return false;
