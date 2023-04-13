@@ -1,8 +1,3 @@
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.1/model-viewer.min.js"></script>
-<p align="center">
-  <model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb" ar environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr" poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp" shadow-intensity="1" camera-controls touch-action="pan-y" style="width: 480px; height: 600px"></model-viewer>
-</p>
-
 # `<model-viewer>`
 
  [![Min Zip](https://badgen.net/bundlephobia/minzip/@google/model-viewer)](https://bundlephobia.com/result?p=@google/model-viewer)
@@ -28,7 +23,10 @@ supported to provide a seamless development experience.
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
 
 ```sh
-npm install three @google/model-viewer
+# install peer dependency ThreeJS
+npm install three 
+# install package
+npm install @google/model-viewer
 ```
 
 It can also be used directly from various free CDNs such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer) and Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):

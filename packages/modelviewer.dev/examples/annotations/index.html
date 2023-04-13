@@ -28,6 +28,7 @@
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
@@ -346,7 +347,7 @@
 
   // update svg
   function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
-    if (dotHotspot1 && dotHotspot1) {
+    if (dotHotspot1 && dotHotspot2) {
       svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
       svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
       svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
