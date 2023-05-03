@@ -259,6 +259,8 @@ export class ARRenderer extends EventDispatcher {
    * If currently presenting a scene in AR, stops presentation and exits AR.
    */
   async stopPresenting() {
+    // zzzz
+    // this.src = this._zOriginalSource
     if (!this.isPresenting) {
       return;
     }

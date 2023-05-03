@@ -91,6 +91,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     arModes: string = DEFAULT_AR_MODES;
 
     @property({type: String, attribute: 'ios-src'}) iosSrc: string|null = null;
+    @property({type: String}) _zarboAndroidSrc: string = '';
+    @property({type: String}) _temp_src: string | null = null;
+    @property({type: String}) _zarboIosSrc: string = '';
 
     @property({type: Boolean, attribute: 'xr-environment'})
     xrEnvironment: boolean = false;
@@ -195,11 +198,20 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
      * require user interaction will most likely be ignored.
      */
     async activateAR() {
+      console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
+          // if (!this.iosSrc && !this._zarboIosSrc) {
+          // this.iosSrc = this._zarboAndroidSrc;
+          // this._zarboIosSrc =  this._zarboAndroidSrc;
+          // this._temp_src = this.src;
+          // this.src = this._zarboAndroidSrc;
+          // }
           this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
+          this.src = this._zarboAndroidSrc
+          this[$updateSource]()
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
@@ -281,7 +293,9 @@ configuration or device capabilities');
         await this[$selectARMode]();
         this.activateAR();
       } finally {
+        this.src = this._temp_src;
         this[$selectARMode]();
+        console.log("LOOOOGGGG:", this.iosSrc, this._zarboIosSrc);
       }
     }
 
@@ -305,7 +319,8 @@ configuration or device capabilities');
     [$openSceneViewer]() {
       const location = self.location.toString();
       const locationUrl = new URL(location);
-      const modelUrl = new URL(this.src!, location);
+      // const modelUrl = new URL(this.src!, location);
+      const modelUrl = new URL(this._zarboAndroidSrc, location);
       if( modelUrl.hash ) modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
 
@@ -367,17 +382,20 @@ configuration or device capabilities');
      * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      const generateUsdz = !this.iosSrc;
+      const generateUsdz = !this._zarboIosSrc;
+      // const generateUsdz = !this.iosSrc;
 
       this[$arButtonContainer].classList.remove('enabled');
 
-      const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      // const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboIosSrc;
       const modelUrl = new URL(objectURL, self.location.toString());
 
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const srcUrl = new URL(this.src!, locationUrl);
+        const srcUrl = new URL(this._zarboAndroidSrc!, locationUrl);
+        // const srcUrl = new URL(this.src!, locationUrl);
         if (srcUrl.hash) {
           modelUrl.hash = srcUrl.hash;
         }
