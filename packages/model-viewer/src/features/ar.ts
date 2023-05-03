@@ -204,13 +204,14 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           // if (!this.iosSrc && !this._zarboIosSrc) {
           // this.iosSrc = this._zarboAndroidSrc;
           // this._zarboIosSrc =  this._zarboAndroidSrc;
-          this._temp_src = this.src;
-          this.src = this._zarboAndroidSrc;
+          // this._temp_src = this.src;
+          // this.src = this._zarboAndroidSrc;
           // }
           this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
           this.src = this._zarboAndroidSrc
+          this[$updateSource]()
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:

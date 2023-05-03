@@ -164,6 +164,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   @property({type: String}) alt: string|null = null;
 
   @property({type: String}) _zarboAndroidSrc: string|null = null;
+  @property({type: String}) _zOriginalSource: string|null = null;
   @property({type: String}) src: string|null = null;
 
   @property({type: Boolean, attribute: 'with-credentials'})
@@ -598,7 +599,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
     scene.stopAnimation();
 
     const updateSourceProgress = this[$progressTracker].beginActivity();
+    // zzzz
     const source = this.src;
+    // this._zOriginalSource = this.src
+    // const source = this._zarboAndroidSrc;
     try {
       const srcUpdated = scene.setSource(
           source,
