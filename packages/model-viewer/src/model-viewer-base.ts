@@ -163,6 +163,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   @property({type: String}) alt: string|null = null;
 
+  @property({type: String}) _zarboAndroidSrc: string|null = null;
   @property({type: String}) src: string|null = null;
 
   @property({type: Boolean, attribute: 'with-credentials'})
