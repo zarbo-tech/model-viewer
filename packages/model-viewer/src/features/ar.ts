@@ -294,7 +294,7 @@ configuration or device capabilities');
         //   await waitForEvent(this, 'load');
         // }) // zzzz
         this[$renderer].arRenderer.addEventListener('status', async res => {
-          alert('я работаю')
+          // alert('я работаю')
           if (res.status === 'session-end') {
             this.src = this._temp_src
             await this[$updateSource]()
