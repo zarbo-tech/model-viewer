@@ -211,7 +211,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           break;
         case ARMode.WEBXR:
           this.src = this._zarboAndroidSrc
-          this[$updateSource]()
+          await this[$updateSource]()
+          // zzzz
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
