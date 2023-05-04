@@ -211,8 +211,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           break;
         case ARMode.WEBXR:
           this.src = this._zarboAndroidSrc
-          await waitForEvent(this, 'load');
           await this[$updateSource]()
+          await waitForEvent(this, 'load');
           // zzzz
           await this[$enterARWithWebXR]();
           break;
