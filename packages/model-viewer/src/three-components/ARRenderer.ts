@@ -260,7 +260,7 @@ export class ARRenderer extends EventDispatcher {
    */
   async stopPresenting() {
     // zzzz
-    // this.src = this._zOriginalSource
+    // this.src = this._temp_src
     if (!this.isPresenting) {
       return;
     }

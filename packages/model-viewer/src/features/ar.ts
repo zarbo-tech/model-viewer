@@ -210,9 +210,10 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
+          this._temp_src = this.src
           this.src = this._zarboAndroidSrc
-          // await this[$updateSource]()
-          // await waitForEvent(this, 'load');
+          await this[$updateSource]()
+          await waitForEvent(this, 'load');
           // zzzz
           await this[$enterARWithWebXR]();
           break;
@@ -295,7 +296,7 @@ configuration or device capabilities');
         await this[$selectARMode]();
         this.activateAR();
       } finally {
-        this.src = this._temp_src;
+        // this.src = this._temp_src;
         this[$selectARMode]();
         console.log("LOOOOGGGG:", this.iosSrc, this._zarboIosSrc);
       }
