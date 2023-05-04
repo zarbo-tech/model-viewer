@@ -20,7 +20,7 @@ import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
+import {ARStatus, ARTracking, resolveARSession} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
 let isWebXRBlocked = false;
@@ -293,7 +293,7 @@ configuration or device capabilities');
         //   await this[$updateSource]()
         //   await waitForEvent(this, 'load');
         // }) // zzzz
-        const currentSession = await this[$renderer].resolveARSession();
+        const currentSession = await resolveARSession();
 
         currentSession.addEventListener('end', () => {
           alert('123123123')
