@@ -288,6 +288,7 @@ configuration or device capabilities');
         arRenderer.placeOnWall = this.arPlacement === 'wall';
         await arRenderer.present(this[$scene], this.xrEnvironment);
         waitForEvent(this[$renderer].arRenderer, 'end').then(async () => {
+          alert('я работаю')
           this.src = this._temp_src
           await this[$updateSource]()
           await waitForEvent(this, 'load');
