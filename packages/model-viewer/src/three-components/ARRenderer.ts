@@ -258,9 +258,11 @@ export class ARRenderer extends EventDispatcher {
   /**
    * If currently presenting a scene in AR, stops presentation and exits AR.
    */
-  async stopPresenting() {
+  async stopPresenting(backUrl) {
     // zzzz
-    // this.src = this._temp_src
+    // if (backUrl) {
+    //   this.src = this._temp_src
+    // }
     if (!this.isPresenting) {
       return;
     }
