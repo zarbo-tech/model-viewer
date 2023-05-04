@@ -20,7 +20,7 @@ import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {ARStatus, ARTracking, resolveARSession} from '../three-components/ARRenderer.js';
+import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
 let isWebXRBlocked = false;
@@ -293,11 +293,14 @@ configuration or device capabilities');
         //   await this[$updateSource]()
         //   await waitForEvent(this, 'load');
         // }) // zzzz
-        const currentSession = await resolveARSession();
-
-        currentSession.addEventListener('end', () => {
-          alert('123123123')
-        }, {once: true});
+        this[$renderer].arRenderer.addEventListener('status', async res => {
+          alert('я работаю')
+          if (res.status === 'session-end') {
+            this.src = this._temp_src
+            await this[$updateSource]()
+            // await waitForEvent(this, 'load');
+          }
+        });
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);

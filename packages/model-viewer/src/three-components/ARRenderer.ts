@@ -206,6 +206,7 @@ export class ARRenderer extends EventDispatcher {
     const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
+      this.dispatchEvent({type: 'status', status: 'session-end'});
       this.postSessionCleanup();
     }, {once: true});
 
