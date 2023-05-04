@@ -287,12 +287,17 @@ configuration or device capabilities');
         const {arRenderer} = this[$renderer];
         arRenderer.placeOnWall = this.arPlacement === 'wall';
         await arRenderer.present(this[$scene], this.xrEnvironment);
-        waitForEvent(this[$renderer].arRenderer, 'end').then(async () => {
-          alert('я работаю')
-          this.src = this._temp_src
-          await this[$updateSource]()
-          await waitForEvent(this, 'load');
-        }) // zzzz
+        // waitForEvent(this[$renderer].arRenderer, 'end').then(async () => {
+        //   alert('я работаю')
+        //   this.src = this._temp_src
+        //   await this[$updateSource]()
+        //   await waitForEvent(this, 'load');
+        // }) // zzzz
+        const currentSession = await this[$renderer].resolveARSession();
+
+        currentSession.addEventListener('end', () => {
+          alert('123123123')
+        }, {once: true});
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
