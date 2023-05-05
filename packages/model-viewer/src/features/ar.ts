@@ -337,7 +337,7 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       // const modelUrl = new URL(this.src!, location);
-      const modelUrl = new URL(this._zarboAndroidSrc, location);
+      const modelUrl = new URL(this._zarboAndroidSrc ? this._zarboAndroidSrc : this.src!, location);
       if( modelUrl.hash ) modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
 
@@ -411,7 +411,7 @@ configuration or device capabilities');
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const srcUrl = new URL(this._zarboAndroidSrc!, locationUrl);
+        const srcUrl = new URL(this._zarboIosSrc!, locationUrl);
         // const srcUrl = new URL(this.src!, locationUrl);
         if (srcUrl.hash) {
           modelUrl.hash = srcUrl.hash;
