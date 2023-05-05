@@ -297,7 +297,7 @@ configuration or device capabilities');
         // }) // zzzz
         this[$renderer].arRenderer.addEventListener('status', async res => {
           // alert('я работаю')
-          if (res.status === 'session-end') {
+          if (res.status === 'session-end') { // мой кастомный эвенет
             this.src = this._temp_src
             await this[$updateSource]()
             // await waitForEvent(this, 'load');
@@ -339,6 +339,7 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       // const modelUrl = new URL(this.src!, location);
+      alert(this.src)
       const modelUrl = new URL(this._zarboAndroidSrc ? this._zarboAndroidSrc : this.src!, location);
       if( modelUrl.hash ) modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
