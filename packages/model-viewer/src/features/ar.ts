@@ -211,7 +211,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           break;
         case ARMode.WEBXR:
           this._temp_src = this.src
-          if (this._zarboAndroidSrc) {
+          if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
             this.src = this._zarboAndroidSrc
             await this[$updateSource]()
             await waitForEvent(this, 'load');
@@ -345,7 +345,6 @@ configuration or device capabilities');
       } else {
         currentModel = this.src!
       }
-      alert('currentModel ' + currentModel)
       const modelUrl = new URL(currentModel, location);
       if( modelUrl.hash ) modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
