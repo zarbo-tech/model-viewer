@@ -339,8 +339,14 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       // const modelUrl = new URL(this.src!, location);
-      alert(this.src)
-      const modelUrl = new URL(this._zarboAndroidSrc ? this._zarboAndroidSrc : this.src!, location);
+      let currentModel = '' 
+      if (this._zarboAndroidSrc) {
+        currentModel = this._zarboAndroidSrc
+      } else {
+        currentModel = this.src!
+      }
+      alert('currentModel ' + currentModel)
+      const modelUrl = new URL(currentModel, location);
       if( modelUrl.hash ) modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
 
