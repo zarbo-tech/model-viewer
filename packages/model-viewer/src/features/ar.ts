@@ -407,15 +407,15 @@ configuration or device capabilities');
      * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
-      if (isZarboIosrSrcUsdz) {
-        this.iosSrc = this._zarboIosSrc
-      }
-      const generateUsdz = !this.iosSrc
-      if (generateUsdz && this._zarboIosSrc) {
-        this.src = this._zarboIosSrc
-      }
-      // const generateUsdz = !this.iosSrc;
+      // const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
+      // if (isZarboIosrSrcUsdz) {
+      //   this.iosSrc = this._zarboIosSrc
+      // }
+      // const generateUsdz = !this.iosSrc
+      // if (generateUsdz && this._zarboIosSrc) {
+      //   this.src = this._zarboIosSrc
+      // }
+      const generateUsdz = !this._zarboAndroidSrc;
       // if (this.iosSrc) { // если есть, то точно usdz
       //   generateUsdz = false
       // } else if (this._zarboIosSrc) { // если есть, не факт что usdz
@@ -429,7 +429,7 @@ configuration or device capabilities');
       this[$arButtonContainer].classList.remove('enabled');
 
       // const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
-      const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboAndroidSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
       if (generateUsdz) {
