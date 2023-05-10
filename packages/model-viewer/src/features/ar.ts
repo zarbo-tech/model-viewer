@@ -198,11 +198,11 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
      * require user interaction will most likely be ignored.
      */
     async activateAR() {
-      console.log(this[$scene]);
+      // console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
           // if (!this.iosSrc && !this._zarboIosSrc) {
-          this.iosSrc = this._zarboAndroidSrc;
+          // this.iosSrc = this._zarboAndroidSrc;
           // this._zarboIosSrc =  this._zarboAndroidSrc;
           // this._temp_src = this.src;
           // this.src = this._zarboAndroidSrc;
@@ -407,8 +407,14 @@ configuration or device capabilities');
      * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      const generateUsdz = !this._zarboIosSrc;
+      let generateUsdz = false
       // const generateUsdz = !this.iosSrc;
+      if (this._zarboIosSrc) {
+        let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
+        if (format !== 'usdz') {
+          generateUsdz = true
+        }
+      }
 
       this[$arButtonContainer].classList.remove('enabled');
 
