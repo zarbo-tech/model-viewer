@@ -407,15 +407,17 @@ configuration or device capabilities');
      * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      // const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
-      // if (isZarboIosrSrcUsdz) {
-      //   this.iosSrc = this._zarboIosSrc
-      // }
+      const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
+      if (!isZarboIosrSrcUsdz) {
+        this.src = this._zarboIosSrc
+        await this[$updateSource]()
+        await waitForEvent(this, 'load');
+      }
       // const generateUsdz = !this.iosSrc
       // if (generateUsdz && this._zarboIosSrc) {
       //   this.src = this._zarboIosSrc
       // }
-      const generateUsdz = !this._zarboIosSrc;
+      const generateUsdz = !isZarboIosrSrcUsdz || !this.iosSrc;
       // if (this.iosSrc) { // если есть, то точно usdz
       //   generateUsdz = false
       // } else if (this._zarboIosSrc) { // если есть, не факт что usdz
