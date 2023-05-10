@@ -411,7 +411,7 @@ configuration or device capabilities');
       if (!isZarboIosrSrcUsdz) {
         this.src = this._zarboIosSrc
         await this[$updateSource]()
-        await waitForEvent(this, 'load');
+        // await waitForEvent(this, 'load');
       }
       // const generateUsdz = !this.iosSrc
       // if (generateUsdz && this._zarboIosSrc) {
