@@ -415,7 +415,7 @@ configuration or device capabilities');
       // if (generateUsdz && this._zarboIosSrc) {
       //   this.src = this._zarboIosSrc
       // }
-      const generateUsdz = !this._zarboAndroidSrc;
+      const generateUsdz = !this._zarboIosSrc;
       // if (this.iosSrc) { // если есть, то точно usdz
       //   generateUsdz = false
       // } else if (this._zarboIosSrc) { // если есть, не факт что usdz
@@ -429,7 +429,7 @@ configuration or device capabilities');
       this[$arButtonContainer].classList.remove('enabled');
 
       // const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
-      const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboAndroidSrc!;
+      const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboIosSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
       if (generateUsdz) {
