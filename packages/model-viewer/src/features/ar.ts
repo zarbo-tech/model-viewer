@@ -202,7 +202,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
           // if (!this.iosSrc && !this._zarboIosSrc) {
-          // this.iosSrc = this._zarboAndroidSrc;
+          this.iosSrc = this._zarboAndroidSrc;
           // this._zarboIosSrc =  this._zarboAndroidSrc;
           // this._temp_src = this.src;
           // this.src = this._zarboAndroidSrc;
@@ -254,7 +254,7 @@ configuration or device capabilities');
 
         // The presence of ios-src overrides the absence of quick-look
         // ar-mode.
-        if (arMode === ARMode.NONE && this.iosSrc != null &&
+        if (arMode === ARMode.NONE && this._zarboIosSrc != null &&
             IS_AR_QUICKLOOK_CANDIDATE) {
           arMode = ARMode.QUICK_LOOK;
         }
