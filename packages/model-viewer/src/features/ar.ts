@@ -407,18 +407,20 @@ configuration or device capabilities');
      * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
-      if (!isZarboIosrSrcUsdz) {
-        this.src = this._zarboIosSrc
-        await this[$updateSource]()
-        // await waitForEvent(this, 'load');
-        // await waitForEvent(this, 'load');
-      }
+      const generateUsdz = !this.iosSrc;
+      // const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
+      // if (!isZarboIosrSrcUsdz) {
+      //   this.src = this._zarboIosSrc
+      //   await this[$updateSource]()
+      //   // await waitForEvent(this, 'load');
+      // }
+
       // const generateUsdz = !this.iosSrc
       // if (generateUsdz && this._zarboIosSrc) {
       //   this.src = this._zarboIosSrc
       // }
-      const generateUsdz = !isZarboIosrSrcUsdz || !this.iosSrc;
+      // const generateUsdz = !isZarboIosrSrcUsdz || !this.iosSrc;
+      // const generateUsdz = !isZarboIosrSrcUsdz;
       // if (this.iosSrc) { // если есть, то точно usdz
       //   generateUsdz = false
       // } else if (this._zarboIosSrc) { // если есть, не факт что usdz
@@ -431,15 +433,15 @@ configuration or device capabilities');
 
       this[$arButtonContainer].classList.remove('enabled');
 
-      // const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
-      const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboIosSrc!;
+      const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      // const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboIosSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const srcUrl = new URL(this._zarboIosSrc!, locationUrl);
-        // const srcUrl = new URL(this.src!, locationUrl);
+        // const srcUrl = new URL(this._zarboIosSrc!, locationUrl);
+        const srcUrl = new URL(this.src!, locationUrl);
         if (srcUrl.hash) {
           modelUrl.hash = srcUrl.hash;
         }
@@ -480,6 +482,7 @@ configuration or device capabilities');
       await this[$triggerLoad]();
 
       const {model, shadow} = this[$scene];
+      alert(JSON.stringify(model))
       if (model == null) {
         return '';
       }
