@@ -441,8 +441,8 @@ configuration or device capabilities');
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        // const srcUrl = new URL(this._zarboIosSrc!, locationUrl);
-        const srcUrl = new URL(this.src!, locationUrl);
+        const srcUrl = new URL(this._zarboIosSrc!, locationUrl);
+        // const srcUrl = new URL(this.src!, locationUrl);
         if (srcUrl.hash) {
           modelUrl.hash = srcUrl.hash;
         }
@@ -482,14 +482,14 @@ configuration or device capabilities');
 
       await this[$triggerLoad]();
 
-      let {model, shadow} = this[$scene];
+      const {model, shadow} = this[$scene];
 
-      if (this._zarboIosSrc) {
-        let gltfLoader = new GLTFLoader()
-        gltfLoader.load(this._zarboIosSrc, function (gltf) {
-          model = gltf.scene
-        })
-      }
+      // if (this._zarboIosSrc) {
+      //   let gltfLoader = new GLTFLoader()
+      //   gltfLoader.load(this._zarboIosSrc, function (gltf) {
+      //     model = gltf.scene
+      //   })
+      // }
 
       if (model == null) {
         return '';
