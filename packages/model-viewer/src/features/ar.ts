@@ -16,6 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -481,8 +482,15 @@ configuration or device capabilities');
 
       await this[$triggerLoad]();
 
-      const {model, shadow} = this[$scene];
-      alert(JSON.stringify(model))
+      let {model, shadow} = this[$scene];
+
+      if (this._zarboIosSrc) {
+        let gltfLoader = new GLTFLoader()
+        gltfLoader.load(this._zarboIosSrc, function (gltf) {
+          model = gltf.scene
+        })
+      }
+
       if (model == null) {
         return '';
       }
