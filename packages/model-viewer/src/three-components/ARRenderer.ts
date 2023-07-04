@@ -206,6 +206,7 @@ export class ARRenderer extends EventDispatcher {
     const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
+      this.dispatchEvent({type: 'status', status: 'session-end'});
       this.postSessionCleanup();
     }, {once: true});
 
@@ -259,6 +260,10 @@ export class ARRenderer extends EventDispatcher {
    * If currently presenting a scene in AR, stops presentation and exits AR.
    */
   async stopPresenting() {
+    // zzzz
+    // if (backUrl) {
+    //   this.src = this._temp_src
+    // }
     if (!this.isPresenting) {
       return;
     }

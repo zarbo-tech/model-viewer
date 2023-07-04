@@ -16,6 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -91,6 +92,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     arModes: string = DEFAULT_AR_MODES;
 
     @property({type: String, attribute: 'ios-src'}) iosSrc: string|null = null;
+    @property({type: String}) _zarboAndroidSrc: string = '';
+    @property({type: String}) _temp_src: string | null = null;
+    @property({type: String}) _zarboIosSrc: string = '';
 
     @property({type: Boolean, attribute: 'xr-environment'})
     xrEnvironment: boolean = false;
@@ -195,11 +199,25 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
      * require user interaction will most likely be ignored.
      */
     async activateAR() {
+      // console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
+          // if (!this.iosSrc && !this._zarboIosSrc) {
+          // this.iosSrc = this._zarboAndroidSrc;
+          // this._zarboIosSrc =  this._zarboAndroidSrc;
+          // this._temp_src = this.src;
+          // this.src = this._zarboAndroidSrc;
+          // }
           this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
+          this._temp_src = this.src
+          if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+            this.src = this._zarboAndroidSrc
+            await this[$updateSource]()
+            await waitForEvent(this, 'load');
+            // zzzz
+          }
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
@@ -237,7 +255,7 @@ configuration or device capabilities');
 
         // The presence of ios-src overrides the absence of quick-look
         // ar-mode.
-        if (arMode === ARMode.NONE && this.iosSrc != null &&
+        if (arMode === ARMode.NONE && this._zarboIosSrc != null &&
             IS_AR_QUICKLOOK_CANDIDATE) {
           arMode = ARMode.QUICK_LOOK;
         }
@@ -272,6 +290,20 @@ configuration or device capabilities');
         const {arRenderer} = this[$renderer];
         arRenderer.placeOnWall = this.arPlacement === 'wall';
         await arRenderer.present(this[$scene], this.xrEnvironment);
+        // waitForEvent(this[$renderer].arRenderer, 'end').then(async () => {
+        //   alert('я работаю')
+        //   this.src = this._temp_src
+        //   await this[$updateSource]()
+        //   await waitForEvent(this, 'load');
+        // }) // zzzz
+        this[$renderer].arRenderer.addEventListener('status', async res => {
+          // alert('я работаю')
+          if (res.status === 'session-end') { // мой кастомный эвенет
+            this.src = this._temp_src
+            await this[$updateSource]()
+            // await waitForEvent(this, 'load');
+          }
+        });
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
@@ -281,7 +313,9 @@ configuration or device capabilities');
         await this[$selectARMode]();
         this.activateAR();
       } finally {
+        // this.src = this._temp_src;
         this[$selectARMode]();
+        console.log("LOOOOGGGG:", this.iosSrc, this._zarboIosSrc);
       }
     }
 
@@ -305,7 +339,14 @@ configuration or device capabilities');
     [$openSceneViewer]() {
       const location = self.location.toString();
       const locationUrl = new URL(location);
-      const modelUrl = new URL(this.src!, location);
+      // const modelUrl = new URL(this.src!, location);
+      let currentModel = '' 
+      if (this._zarboAndroidSrc) {
+        currentModel = this._zarboAndroidSrc
+      } else {
+        currentModel = this.src!
+      }
+      const modelUrl = new URL(currentModel, location);
       if( modelUrl.hash ) modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
 
@@ -368,16 +409,40 @@ configuration or device capabilities');
      */
     async[$openIOSARQuickLook]() {
       const generateUsdz = !this.iosSrc;
+      // const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
+      // if (!isZarboIosrSrcUsdz) {
+      //   this.src = this._zarboIosSrc
+      //   await this[$updateSource]()
+      //   // await waitForEvent(this, 'load');
+      // }
+
+      // const generateUsdz = !this.iosSrc
+      // if (generateUsdz && this._zarboIosSrc) {
+      //   this.src = this._zarboIosSrc
+      // }
+      // const generateUsdz = !isZarboIosrSrcUsdz || !this.iosSrc;
+      // const generateUsdz = !isZarboIosrSrcUsdz;
+      // if (this.iosSrc) { // если есть, то точно usdz
+      //   generateUsdz = false
+      // } else if (this._zarboIosSrc) { // если есть, не факт что usdz
+      //   let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
+      //   if (format === 'usdz') {
+      //     generateUsdz = false
+      //   }
+      // }
+      // const demostrateIosUrl = !generateUsdz ? (this._zarboIosSrc || this.iosSrc) : null
 
       this[$arButtonContainer].classList.remove('enabled');
 
       const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      // const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboIosSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const srcUrl = new URL(this.src!, locationUrl);
+        const srcUrl = new URL(this._zarboIosSrc!, locationUrl);
+        // const srcUrl = new URL(this.src!, locationUrl);
         if (srcUrl.hash) {
           modelUrl.hash = srcUrl.hash;
         }
@@ -418,6 +483,14 @@ configuration or device capabilities');
       await this[$triggerLoad]();
 
       const {model, shadow} = this[$scene];
+
+      // if (this._zarboIosSrc) {
+      //   let gltfLoader = new GLTFLoader()
+      //   gltfLoader.load(this._zarboIosSrc, function (gltf) {
+      //     model = gltf.scene
+      //   })
+      // }
+
       if (model == null) {
         return '';
       }
