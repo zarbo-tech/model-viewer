@@ -69,7 +69,7 @@ export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
 export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
 
 export var IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_OCULUS;
-IS_SCENEVIEWER_CANDIDATE = IS_SCENEVIEWER_CANDIDATE || IS_FIREFOX;
+IS_SCENEVIEWER_CANDIDATE = IS_SCENEVIEWER_CANDIDATE || (IS_FIREFOX && IS_MOBILE && !IS_SAFARI);
 
 // Extend Window type with webkit property,
 // required to check if iOS is running within a WKWebView browser instance.
