@@ -16,7 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
-// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -101,7 +101,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     get canActivateAR(): boolean {
       return this[$arMode] !== ARMode.NONE;
-    }
+    } 
 
     protected[$canActivateAR]: boolean = false;
 
@@ -408,7 +408,20 @@ configuration or device capabilities');
      * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      const generateUsdz = !this.iosSrc;
+      const isUsdz = this._zarboIosSrc && this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz'
+      const generateUsdz = !this._zarboIosSrc || (this._zarboIosSrc && !isUsdz);
+
+      let objectURL = ''
+      if (this._zarboIosSrc) { // для ios модель вобще указана
+        if (isUsdz) {
+          objectURL = this._zarboIosSrc
+        } else {
+          // this.src = this._zarboIosSrc
+          // await this[$updateSource]()
+          // await waitForEvent(this, 'load');
+          objectURL = await this.prepareUSDZ()
+        }
+      }
       // const isZarboIosrSrcUsdz = this._zarboIosSrc && (this._zarboIosSrc.split('.').splice(-1, 1)[0] === 'usdz')
       // if (!isZarboIosrSrcUsdz) {
       //   this.src = this._zarboIosSrc
@@ -434,7 +447,7 @@ configuration or device capabilities');
 
       this[$arButtonContainer].classList.remove('enabled');
 
-      const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      // const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
       // const objectURL = generateUsdz ? await this.prepareUSDZ() : this._zarboIosSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
@@ -482,14 +495,15 @@ configuration or device capabilities');
 
       await this[$triggerLoad]();
 
-      const {model, shadow} = this[$scene];
+      // const {model, shadow} = this[$scene];
+      let {model, shadow} = this[$scene];
 
-      // if (this._zarboIosSrc) {
-      //   let gltfLoader = new GLTFLoader()
-      //   gltfLoader.load(this._zarboIosSrc, function (gltf) {
-      //     model = gltf.scene
-      //   })
-      // }
+      if (this._zarboIosSrc) {
+        let gltfLoader = new GLTFLoader()
+        gltfLoader.load(this._zarboIosSrc, function (gltf) {
+          model = gltf.scene
+        })
+      }
 
       if (model == null) {
         return '';
