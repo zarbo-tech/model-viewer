@@ -14,9 +14,9 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Event as ThreeEvent} from 'three';
+import {Object3D, Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
-// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -93,6 +93,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'ios-src'}) iosSrc: string|null = null;
     @property({type: String}) _zarboAndroidSrc: string = '';
+    @property({type: String}) _zarbo3dSrc: string = '';
     @property({type: String}) _temp_src: string | null = null;
     @property({type: String}) _zarboIosSrc: string = '';
 
@@ -212,11 +213,16 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           break;
         case ARMode.WEBXR:
           this._temp_src = this.src
-          if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+          // if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+          //   this.src = this._zarboAndroidSrc
+          //   await this[$updateSource]()
+          //   await waitForEvent(this, 'load');
+          //   // zzzz
+          // }
+          if (this._zarbo3dSrc !== this._zarboAndroidSrc && this._zarboAndroidSrc) {
             this.src = this._zarboAndroidSrc
             await this[$updateSource]()
             await waitForEvent(this, 'load');
-            // zzzz
           }
           await this[$enterARWithWebXR]();
           break;
@@ -229,6 +235,10 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 configuration or device capabilities');
           break;
       }
+    }
+
+    getFileExtension(url: any) {
+      return url.split('.').pop();
     }
 
     async[$selectARMode]() {
@@ -477,19 +487,25 @@ configuration or device capabilities');
       this[$arButtonContainer].classList.add('enabled');
     }
 
+    modelLoader(url: any): Promise<Object3D> {
+      let gltfLoader = new GLTFLoader()
+
+      return new Promise((resolve) => {
+        // @ts-ignore
+        gltfLoader.load(url, data => resolve(data));
+      });
+    }
+ 
     async prepareUSDZ(): Promise<string> {
       const updateSourceProgress = this[$progressTracker].beginActivity();
 
       await this[$triggerLoad]();
 
-      const {model, shadow} = this[$scene];
-
-      // if (this._zarboIosSrc) {
-      //   let gltfLoader = new GLTFLoader()
-      //   gltfLoader.load(this._zarboIosSrc, function (gltf) {
-      //     model = gltf.scene
-      //   })
-      // }
+      let {model, shadow} = this[$scene];
+      
+      if (this._zarboIosSrc) {
+        model = await this.modelLoader(this._zarboIosSrc)
+      }
 
       if (model == null) {
         return '';
@@ -507,6 +523,7 @@ configuration or device capabilities');
 
       const exporter = new USDZExporter();
       const arraybuffer = await exporter.parse(model);
+
       const blob = new Blob([arraybuffer], {
         type: 'model/vnd.usdz+zip',
       });
