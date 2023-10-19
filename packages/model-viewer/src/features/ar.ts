@@ -203,13 +203,20 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       // console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          // if (!this.iosSrc && !this._zarboIosSrc) {
+          let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
+          if (this._zarboIosSrc && (format === 'glb' || format ==='gltf') ) {
           // this.iosSrc = this._zarboAndroidSrc;
           // this._zarboIosSrc =  this._zarboAndroidSrc;
           // this._temp_src = this.src;
-          // this.src = this._zarboAndroidSrc;
-          // }
+            this.src = this._zarboIosSrc;
+            await this[$updateSource]()
+            await waitForEvent(this, 'load');
+          }
           this[$openIOSARQuickLook]();
+
+          this.src = this._zarbo3dSrc
+          await this[$updateSource]()
+
           break;
         case ARMode.WEBXR:
           this._temp_src = this.src
@@ -501,11 +508,11 @@ configuration or device capabilities');
 
       await this[$triggerLoad]();
 
-      let {model, shadow} = this[$scene];
+      const {model, shadow} = this[$scene];
       
-      if (this._zarboIosSrc) {
-        model = await this.modelLoader(this._zarboIosSrc)
-      }
+      // if (this._zarboIosSrc) {
+      //   model = await this.modelLoader(this._zarboIosSrc)
+      // }
 
       if (model == null) {
         return '';
