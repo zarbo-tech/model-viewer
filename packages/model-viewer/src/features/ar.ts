@@ -204,18 +204,26 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
           let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
-          if (this._zarboIosSrc && (format === 'glb' || format ==='gltf') ) {
+          if (this._zarboIosSrc && (format === 'glb' || format === 'gltf')) { // если это подмена
           // this.iosSrc = this._zarboAndroidSrc;
           // this._zarboIosSrc =  this._zarboAndroidSrc;
           // this._temp_src = this.src;
-            this.src = this._zarboIosSrc;
-            await this[$updateSource]()
-            await waitForEvent(this, 'load');
+            if (this._zarboIosSrc !== this.src) { // если подменяем на что-то другое(глб)
+              this.src = this._zarboIosSrc;
+              await this[$updateSource]()
+              await waitForEvent(this, 'load');
+              this[$openIOSARQuickLook]();
+    
+              setTimeout(() => {
+                this.src = this._zarbo3dSrc
+                this[$updateSource]()
+              }, 100);
+            } else { // если подмена, но это то же и в браузере
+              this[$openIOSARQuickLook]();
+            }
+          } else { // если usdz
+            this[$openIOSARQuickLook]();
           }
-          this[$openIOSARQuickLook]();
-
-          this.src = this._zarbo3dSrc
-          await this[$updateSource]()
 
           break;
         case ARMode.WEBXR:
@@ -226,12 +234,16 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
           //   await waitForEvent(this, 'load');
           //   // zzzz
           // }
-          if (this._zarbo3dSrc !== this._zarboAndroidSrc && this._zarboAndroidSrc) {
+          if ((this.src !== this._zarboAndroidSrc) && this._zarboAndroidSrc) {
             this.src = this._zarboAndroidSrc
-            await this[$updateSource]()
-            await waitForEvent(this, 'load');
+            // await this[$triggerLoad]()
+            // await this[$updateSource]()
+            // await waitForEvent(this, 'load');
+            await this[$enterARWithWebXR]();
+          } else {
+            await this[$enterARWithWebXR]();
           }
-          await this[$enterARWithWebXR]();
+            // await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
           this[$openSceneViewer]();
@@ -332,7 +344,7 @@ configuration or device capabilities');
       } finally {
         // this.src = this._temp_src;
         this[$selectARMode]();
-        console.log("LOOOOGGGG:", this.iosSrc, this._zarboIosSrc);
+        console.log("LOOOOGGGG:", this.src, this._zarboAndroidSrc);
       }
     }
 
