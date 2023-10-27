@@ -34,8 +34,9 @@ const port = 9030;
 const screenshotCreator = new ArtifactCreator(
     config,
     rootDirectory,
-    `http://localhost:${port}/test/renderers/model-viewer/`);
-const server = HTTPServer.createServer({root: './', cache: -1});
+    `http://localhost:${
+        port}/packages/render-fidelity-tools/test/renderers/model-viewer/`);
+const server = HTTPServer.createServer({root: '../../', cache: -1});
 server.listen(port);
 
 
@@ -61,6 +62,7 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
+      screenshotCreator.close();
 
       const fidelityRegressionPath =
           join(outputDirectory, 'fidelityRegressionResults.json');
@@ -91,8 +93,7 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       }
 
       if (fidelityRegressionWarningCount > 0) {
-        console.log(
-            `Warnings on ${fidelityRegressionWarningCount} senarios❗️`);
+        console.log(`Warnings on ${fidelityRegressionWarningCount} senarios❗️`);
         console.log('\n🔍 Logging warning scenarios: ');
         for (const warning of fidelityRegressionWarnings) {
           console.log(warning);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere, SpotLight} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -62,7 +62,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         node.name = node.uuid;
       }
       const mesh = node as Mesh;
-      if (mesh.isMesh) {
+      if (mesh.material) {
         const {geometry} = mesh;
         mesh.castShadow = true;
         if ((mesh as any).isSkinnedMesh) {
@@ -120,8 +120,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       // and materials are copied by reference. This is necessary
       // for the same model to be used twice with different
       // scene-graph operations.
-      if ((node as Mesh).isMesh) {
-        const mesh = node as Mesh;
+      const mesh = node as Mesh;
+      if (mesh.material) {
         const material = mesh.material as MeshStandardMaterial;
         if (material != null) {
           if (sourceUUIDToClonedMaterial.has(material.uuid)) {
@@ -132,6 +132,13 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
           mesh.material = material.clone() as MeshStandardMaterial;
           sourceUUIDToClonedMaterial.set(material.uuid, mesh.material);
         }
+      }
+
+      const light = node as SpotLight;
+      if (light.target !== undefined) {
+        // The target's parent is lost in the cloning process, but in
+        // GLTFLoader, all light targets are children of their light.
+        light.add(light.target);
       }
     });
 

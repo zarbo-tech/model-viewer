@@ -21,13 +21,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
-  <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
 </head>
 <body>
     <button onclick="addElement()">Add ModelViewer</button><br />
     <button onclick="removeElement()">Remove ModelViewer</button><br />
-    <script type="module" src="../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
+    <script type="module" src="../../../node_modules/@google/model-viewer/dist/model-viewer.js"></script>
     <script type="module">
       customElements.get("model-viewer").modelCacheSize = 0;
 

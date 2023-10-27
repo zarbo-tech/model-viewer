@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {$threeTexture} from '../../../features/scene-graph/image.js';
@@ -23,10 +24,6 @@ import {$correlatedObjects} from '../../../features/scene-graph/three-dom-elemen
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
-
-
-
-const expect = chai.expect;
 
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 const HELMET_GLB_PATH = assetPath(
@@ -268,6 +265,7 @@ suite('scene-graph/material', () => {
         'Accessing a getter of a loaded material has valid data.', async () => {
           await model.materials[2].ensureLoaded();
           expect(model.materials[2].isLoaded).to.be.true;
+          expect(model.materials[2].name).to.equal('red');
           const pbr = model.materials[2].pbrMetallicRoughness;
           expect(pbr).to.be.ok;
         });

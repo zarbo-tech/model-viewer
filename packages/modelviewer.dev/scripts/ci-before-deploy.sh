@@ -33,29 +33,27 @@ DEPLOYABLE_STATIC_FILES=( \
   CNAME \
   LICENSE \
   README.md \
-  node_modules/@google/model-viewer/dist \
-  node_modules/focus-visible \
-  node_modules/js-beautify \
-  node_modules/web-animations-js \
   shared-assets/models/*.* \
   shared-assets/models/twitter \
   shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
   shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
   shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
   shared-assets/models/glTF-Sample-Models/2.0/BoomBox \
+  shared-assets/models/glTF-Sample-Models/2.0/BoxTextured \
+  shared-assets/models/glTF-Sample-Models/2.0/Buggy \
   shared-assets/models/glTF-Sample-Models/2.0/BrainStem \
   shared-assets/models/glTF-Sample-Models/2.0/Corset \
+  shared-assets/models/glTF-Sample-Models/2.0/Cube \
   shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
   shared-assets/models/glTF-Sample-Models/2.0/Duck \
   shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
   shared-assets/models/glTF-Sample-Models/2.0/Lantern \
+  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
   shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
   shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
-  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
-  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
-  shared-assets/models/glTF-Sample-Models/2.0/Buggy \
   shared-assets/models/glTF-Sample-Models/2.0/ToyCar \
+  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
   shared-assets/environments \
   shared-assets/icons \
 )
@@ -105,6 +103,14 @@ mkdir -p $DEPLOY_ROOT/fidelity
 mkdir -p $DEPLOY_ROOT/editor
 mkdir -p $DEPLOY_ROOT/editor/view
 mkdir -p $DEPLOY_ROOT/dist
+mkdir -p $DEPLOY_ROOT/node_modules
+mkdir -p $DEPLOY_ROOT/node_modules/@google
+mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer
+mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer/dist
+mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer-effects
+mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist
+mkdir -p $DEPLOY_ROOT/node_modules/js-beautify
+mkdir -p $DEPLOY_ROOT/node_modules/web-animations-js
 
 mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
 cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
@@ -112,11 +118,21 @@ cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
 cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
 cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
+cp ../model-viewer/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer/dist/
+cp ../model-viewer-effects/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist/
+cp -r ../../node_modules/js-beautify/* $DEPLOY_ROOT/node_modules/js-beautify
+cp -r ../../node_modules/web-animations-js/* $DEPLOY_ROOT/node_modules/web-animations-js
 
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
 
 for file_to_patch in "${FILES_TO_PATCH_WITH_MINIFIED_BUNDLE[@]}"; do
-  sed -i.bak 's/model-viewer\.js/model-viewer\.min\.js/g' $file_to_patch
+  sed -i.bak 's model-viewer.js model-viewer.min.js g' $file_to_patch
+  rm $file_to_patch.bak
+  sed -i.bak 's model-viewer-module.js model-viewer-module.min.js g' $file_to_patch
+  rm $file_to_patch.bak
+  sed -i.bak 's model-viewer-effects.js model-viewer-effects.min.js g' $file_to_patch
+  rm $file_to_patch.bak
+  sed -i.bak 's ../../node_modules/ node_modules/ g' $file_to_patch
   rm $file_to_patch.bak
 done
 

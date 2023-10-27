@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, CustomToneMapping, Event, EventDispatcher, ShaderChunk, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -22,7 +22,6 @@ import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
-import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
@@ -58,7 +57,8 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * Canvas2DRenderingContext if supported for cheaper transferring of
  * the texture.
  */
-export class Renderer extends EventDispatcher {
+export class Renderer extends
+    EventDispatcher<{contextlost: {sourceEvent: WebGLContextEvent}}> {
   private static _singleton = new Renderer({
     powerPreference:
         (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
@@ -99,7 +99,6 @@ export class Renderer extends EventDispatcher {
   public height = 0;
   public dpr = 1;
 
-  protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick = performance.now();
@@ -137,21 +136,45 @@ export class Renderer extends EventDispatcher {
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.classList.add('show');
 
+    // Emmett's new 3D Commerce tone mapping function
+    ShaderChunk.tonemapping_pars_fragment =
+        ShaderChunk.tonemapping_pars_fragment.replace(
+            'vec3 CustomToneMapping( vec3 color ) { return color; }', `
+      float startCompression = 0.8;
+      float desaturation = 0.5;
+      vec3 CustomToneMapping( vec3 color ) {
+        color *= toneMappingExposure;
+        
+        float d = 1. - startCompression;
+
+        float peak = max(color.r, max(color.g, color.b));
+        if (peak < startCompression) return color;
+
+        float newPeak = 1. - d * d / (peak + d - startCompression);
+        float invPeak = 1. / peak;
+        
+        float extraBrightness = dot(color * (1. - startCompression * invPeak), vec3(1, 1, 1));
+        
+        color *= newPeak * invPeak;
+        float g = 1. - 3. / (desaturation * extraBrightness + 3.);
+        return mix(color, vec3(1, 1, 1), g);
+      }`);
+
     try {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
         powerPreference: options.powerPreference as WebGLPowerPreference,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
       });
       this.threeRenderer.autoClear = true;
-      this.threeRenderer.outputEncoding = sRGBEncoding;
-      this.threeRenderer.useLegacyLights = false;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
-      this.debugger = !!options.debug ? new Debugger(this) : null;
-      this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
+      this.threeRenderer.debug = {
+        checkShaderErrors: !!options.debug,
+        onShaderError: null
+      };
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
@@ -186,10 +209,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setAnimationLoop(
           (time: number, frame?: any) => this.render(time, frame));
     }
-
-    if (this.debugger != null) {
-      this.debugger.addScene(scene);
-    }
   }
 
   unregisterScene(scene: ModelScene) {
@@ -201,10 +220,6 @@ export class Renderer extends EventDispatcher {
 
     if (this.canRender && this.scenes.size === 0) {
       this.threeRenderer.setAnimationLoop(null);
-    }
-
-    if (this.debugger != null) {
-      this.debugger.removeScene(scene);
     }
   }
 
@@ -291,6 +306,7 @@ export class Renderer extends EventDispatcher {
       canvas.width = width;
       canvas.height = height;
       scene.forceRescale();
+      scene.effectRenderer?.setSize(width, height);
     }
   }
 
@@ -491,8 +507,16 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.camera);
-
+      if (scene.effectRenderer != null) {
+        scene.effectRenderer.render(delta);
+      } else {
+        this.threeRenderer.autoClear =
+            true;  // this might get reset by the effectRenderer
+        this.threeRenderer.toneMapping = scene.toneMapping === 'commerce' ?
+            CustomToneMapping :
+            ACESFilmicToneMapping;
+        this.threeRenderer.render(scene, scene.camera);
+      }
       if (this.multipleScenesVisible ||
           (!scene.element.modelIsVisible && scene.renderCount === 0)) {
         this.copyPixels(scene, width, height);

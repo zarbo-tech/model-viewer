@@ -30,13 +30,12 @@
   <script type="importmap-shim">
     {
       "imports": {
-        "three": "../../node_modules/@google/model-viewer/dist/model-viewer.js"
+        "three": "../../../../node_modules/@google/model-viewer/dist/model-viewer.js"
       }
     }
   </script>
 
-  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
-  <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
 
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
@@ -54,7 +53,8 @@
   display: flex;
   flex-direction: column;
   align-items: left;
-  bottom: 8px;
+  bottom: 40px;
+  background-color: #dddddd88;
   left: 8px;
 }
 
@@ -230,7 +230,7 @@ z.addEventListener('input', () => {
           <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
 <model-viewer id="color" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of an astronaut">
-  <div class="controls", id="color-controls">
+  <div class="controls" id="color-controls">
     <button data-color="#ff0000">Red</button>
     <button data-color="#00ff00">Green</button>
     <button data-color="#0000ff">Blue</button>
@@ -380,7 +380,7 @@ modelViewerTexture.addEventListener("load", () => {
 
 
     <div class="sample">
-      <div id="swapTextures" class="demo"></div>
+      <div id="swapTexturesExample" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
@@ -389,7 +389,7 @@ modelViewerTexture.addEventListener("load", () => {
               mode. iOS Quick Look reflects these texture changes so long as the
               USDZ is auto-generated.</p>
           </div>
-          <example-snippet stamp-to="swapTextures" highlight-as="html">
+          <example-snippet stamp-to="swapTexturesExample" highlight-as="html">
             <template>
 <model-viewer id="helmet" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar alt="A 3D model of a helmet">
   <div class="controls">
@@ -477,6 +477,88 @@ modelViewerTexture1.addEventListener("load", () => {
         </div>
       </div>
     </div>
+
+
+    <div class="sample">
+      <div id="transformTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Transform textures</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
+          </div>
+          <example-snippet stamp-to="transformTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf" ar alt="A 3D model of a helmet">
+  <div class="controls">
+      <p>Rotation: <span id="texture-rotation"></span></p>
+      <input type="range" min="0" max="3.14" value="0" step="0.01" id="rotationSlider">
+      <p>Scale: <span id="texture-scale"></span></p>
+      <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="scaleSlider">
+      <p>Offset</p>
+      <input type="range" min="0" max="1" value="0" step="0.01" id="offsetSlider">
+      <p>WrapMode</p>
+      <select id="wrapMode">
+        <option value="10497">Repeat</option>
+        <option value="33071">ClampToEdge</option>
+        <option value="33648">MirroredRepeat</option>
+      </select>
+    </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture2 = document.querySelector("model-viewer#box");
+const rotationSlider = document.querySelector('#rotationSlider');
+const scaleSlider = document.querySelector('#scaleSlider');
+const offsetSlider = document.querySelector('#offsetSlider');
+
+modelViewerTexture2.addEventListener("load", () => {
+
+  const sampler = modelViewerTexture2.model.materials[0].pbrMetallicRoughness['baseColorTexture'].texture.sampler;
+
+  const rotationDisplay = document.querySelector('#texture-rotation');
+  const scaleDisplay = document.querySelector('#texture-scale');
+
+  rotationDisplay.textContent = rotationSlider.value;
+  scaleDisplay.textContent = scaleSlider.value;
+
+  rotationSlider.addEventListener('input', (event) => {
+    const rotation = rotationSlider.value;
+    sampler.setRotation(rotation);
+    rotationDisplay.textContent = rotation;
+  });
+
+  scaleSlider.addEventListener('input', (event) => {
+    const scale = {
+      u: scaleSlider.value,
+      v: scaleSlider.value
+    };
+    sampler.setScale(scale);
+    scaleDisplay.textContent = scale.x;
+  });
+
+  offsetSlider.addEventListener('input', (event) => {
+    const offset = {
+      u: offsetSlider.value,
+      v: -offsetSlider.value
+    };
+    sampler.setOffset(offset);
+  });
+
+  document.querySelector('#wrapMode').addEventListener('input', (event) => {
+    sampler.setWrapS(Number(event.target.value));
+    sampler.setWrapT(Number(event.target.value));
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
 
     <div class="sample">
       <div id="animatedTexturesExample" class="demo"></div>
@@ -700,6 +782,9 @@ interface Sampler {
   setMagFilter(filter: MagFilter): void;
   setWrapS(mode: WrapMode): void;
   setWrapT(mode: WrapMode): void;
+  setRotation(rotation: number|null): void;
+  setScale(scale: Vector2|null): void;
+  setOffset(offset: Vector2|null): void;
 }
 
 interface Image {
@@ -738,6 +823,11 @@ interface Image {
   update(): void;
 }
 
+interface Vector2D {
+  readonly u: number;
+  readonly v: number;
+}
+
 type RGBA = [number, number, number, number];
 type RGB = [number, number, number];
 type AlphaMode = 'OPAQUE'|'MASK'|'BLEND';
@@ -757,7 +847,7 @@ enum MinFilter {
   LinearMipmapLinear = 9987,
 }
 
-enum MaxFilter {
+enum MagFilter {
   Nearest = 9728,
   Linear = 9729,
 }
@@ -856,7 +946,7 @@ enum MaxFilter {
 
   <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module-shim"
-      src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
+      src="../../../../node_modules/@google/model-viewer/dist/model-viewer.js">
   </script>
 </body>
 </html>

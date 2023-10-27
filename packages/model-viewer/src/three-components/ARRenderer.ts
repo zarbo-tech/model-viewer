@@ -77,7 +77,8 @@ const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
-export class ARRenderer extends EventDispatcher {
+export class ARRenderer extends EventDispatcher<
+    {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
   public threeRenderer: WebGLRenderer;
   public currentSession: XRSession|null = null;
   public placeOnWall = false;
@@ -206,7 +207,7 @@ export class ARRenderer extends EventDispatcher {
     const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
-      this.dispatchEvent({type: 'status', status: 'session-end'});
+      // this.dispatchEvent({type: 'status', status: 'session-end'});
       this.postSessionCleanup();
     }, {once: true});
 
@@ -412,7 +413,7 @@ export class ARRenderer extends EventDispatcher {
 
   private updateView(view: XRView) {
     const scene = this.presentedScene!;
-    const xr = this.threeRenderer.xr as any;
+    const xr = this.threeRenderer.xr;
 
     xr.updateCamera(camera);
     scene.xrCamera = xr.getCamera();

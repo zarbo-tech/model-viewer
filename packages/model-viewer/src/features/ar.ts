@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Object3D, Event as ThreeEvent} from 'three';
+// import {Object3D, Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 // import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -122,7 +122,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.activateAR();
     };
 
-    private[$onARStatus] = ({status}: ThreeEvent) => {
+    private[$onARStatus] = ({status}: {status: ARStatus}) => {
       if (status === ARStatus.NOT_PRESENTING ||
           this[$renderer].arRenderer.presentedScene === this[$scene]) {
         this.setAttribute('ar-status', status);
@@ -136,7 +136,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     };
 
-    private[$onARTracking] = ({status}: ThreeEvent) => {
+    private[$onARTracking] = ({status}: {status: ARTracking}) => {
       this.setAttribute('ar-tracking', status);
       this.dispatchEvent(new CustomEvent<ARTrackingDetails>(
           'ar-tracking', {detail: {status}}));
@@ -203,22 +203,16 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       // console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          // if (!this.iosSrc && !this._zarboIosSrc) {
-          // this.iosSrc = this._zarboAndroidSrc;
-          // this._zarboIosSrc =  this._zarboAndroidSrc;
-          // this._temp_src = this.src;
-          // this.src = this._zarboAndroidSrc;
-          // }
-          this[$openIOSARQuickLook]();
+          await this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
           this._temp_src = this.src
-          if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
-            this.src = this._zarboAndroidSrc
-            await this[$updateSource]()
-            await waitForEvent(this, 'load');
-            // zzzz
-          }
+          // if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+          //   this.src = this._zarboAndroidSrc
+          //   await this[$updateSource]()
+          //   await waitForEvent(this, 'load');
+          //   // zzzz
+          // }
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
@@ -287,9 +281,9 @@ configuration or device capabilities');
     protected async[$enterARWithWebXR]() {
       console.log('Attempting to present in AR with WebXR...');
 
-      // if ((this.src !== this._zarboAndroidSrc) && this._zarboAndroidSrc) {
-      //   this.src = this._zarboAndroidSrc
-      // } 
+      if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+        this.src = this._zarboAndroidSrc
+      } 
 
       await this[$triggerLoad]();
 
@@ -350,14 +344,16 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       // const modelUrl = new URL(this.src!, location);
-      let currentModel = '' 
-      if (this._zarboAndroidSrc) {
-        currentModel = this._zarboAndroidSrc
-      } else {
-        currentModel = this.src!
-      }
-      const modelUrl = new URL(currentModel, location);
-      if( modelUrl.hash ) modelUrl.hash = '';
+      // let currentModel = '' 
+      // if (this._zarboAndroidSrc) {
+      //   currentModel = this._zarboAndroidSrc
+      // } else {
+      //   currentModel = this.src!
+      // }
+
+      const modelUrl = new URL(this.src!, location);
+      if (modelUrl.hash)
+        modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
 
       locationUrl.hash = noArViewerSigil;
@@ -474,9 +470,11 @@ configuration or device capabilities');
         anchor.setAttribute('download', 'model.usdz');
       }
 
-      // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message event propagation 
+      // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message
+      // event propagation
       anchor.style.display = 'none';
-      if(!anchor.isConnected) this.shadowRoot!.appendChild(anchor);
+      if (!anchor.isConnected)
+        this.shadowRoot!.appendChild(anchor);
 
       console.log('Attempting to present in AR with Quick Look...');
       anchor.click();

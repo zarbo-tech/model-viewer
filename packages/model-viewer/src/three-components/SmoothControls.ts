@@ -125,8 +125,14 @@ export interface PointerChangeEvent extends ThreeEvent {
  * has been set in terms of position, rotation and scale, so it is important to
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
-export class SmoothControls extends EventDispatcher {
+export class SmoothControls extends EventDispatcher<{
+  'user-interaction': {},
+  'pointer-change-start': {},
+  'pointer-change-end': {}
+}> {
   public orbitSensitivity = 1;
+  public zoomSensitivity = 1;
+  public panSensitivity = 1;
   public inputSensitivity = 1;
   public changeSource = ChangeSource.NONE;
 
@@ -528,7 +534,7 @@ export class SmoothControls extends EventDispatcher {
     if (!this._disableZoom) {
       const touchDistance =
           this.twoTouchDistance(this.pointers[0], this.pointers[1]);
-      const deltaZoom = ZOOM_SENSITIVITY *
+      const deltaZoom = ZOOM_SENSITIVITY * this.zoomSensitivity *
           (this.lastSeparation - touchDistance) * 50 / this.scene.height;
       this.lastSeparation = touchDistance;
 
@@ -584,7 +590,8 @@ export class SmoothControls extends EventDispatcher {
   private initializePan() {
     const {theta, phi} = this.spherical;
     const psi = theta - this.scene.yaw;
-    this.panPerPixel = PAN_SENSITIVITY / this.scene.height;
+    this.panPerPixel =
+        PAN_SENSITIVITY * this.panSensitivity / this.scene.height;
     this.panProjection.set(
         -Math.cos(psi),
         -Math.cos(phi) * Math.sin(psi),
@@ -711,6 +718,12 @@ export class SmoothControls extends EventDispatcher {
       return;
     }
 
+    // In case no one gave us a pointerup or pointercancel event.
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      this.onPointerUp(event);
+      return;
+    }
+
     const numTouches = this.pointers.length;
     const dx = (event.clientX - pointer.clientX) / numTouches;
     const dy = (event.clientY - pointer.clientY) / numTouches;
@@ -813,7 +826,8 @@ export class SmoothControls extends EventDispatcher {
     this.changeSource = ChangeSource.USER_INTERACTION;
 
     const deltaZoom = (event as WheelEvent).deltaY *
-        ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
+        ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY *
+        this.zoomSensitivity / 30;
     this.userAdjustOrbit(0, 0, deltaZoom);
 
     event.preventDefault();
@@ -849,10 +863,11 @@ export class SmoothControls extends EventDispatcher {
     let relevantKey = true;
     switch (event.key) {
       case 'PageUp':
-        this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
+        this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY * this.zoomSensitivity);
         break;
       case 'PageDown':
-        this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
+        this.userAdjustOrbit(
+            0, 0, -1 * ZOOM_SENSITIVITY * this.zoomSensitivity);
         break;
       case 'ArrowUp':
         this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);

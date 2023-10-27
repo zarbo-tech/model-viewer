@@ -32,7 +32,7 @@ import {ArConfigState, BestPracticesState, extractStagingConfig, ModelViewerConf
 import {getBestPractices} from '../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {dispatchCameraIsDirty} from '../camera_settings/reducer.js';
-import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
+import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchConfig, dispatchEnvironmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
@@ -44,7 +44,7 @@ import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js'
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
-import {dispatchGltfUrl, dispatchModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
+import {dispatchGltfUrl, dispatchModel, getGltfUrl, getModelViewer, renderCommonChildElements} from './reducer.js';
 
 /**
  * Renders and updates the model-viewer tag, serving as a preview of the edits.
@@ -167,16 +167,30 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private addHotspot(event: MouseEvent) {
-    const surface =
-        this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
-    if (!surface) {
-          console.log('Click was not on model, no hotspot added.');
-          return;
+    if (getModelViewer().availableAnimations.length > 0) {
+          const surface =
+              this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
+          if (!surface) {
+            console.log('Click was not on model, no hotspot added.');
+            return;
+          }
+          reduxStore.dispatch(dispatchAddHotspot({
+            name: generateUniqueHotspotName(),
+            surface,
+          }));
+    } else {
+          const point = this.modelViewer.positionAndNormalFromPoint(
+              event.clientX, event.clientY);
+          if (!point) {
+            console.log('Click was not on model, no hotspot added.');
+            return;
+          }
+          reduxStore.dispatch(dispatchAddHotspot({
+            name: generateUniqueHotspotName(),
+            position: point.position.toString(),
+            normal: point.normal.toString()
+          }));
     }
-    reduxStore.dispatch(dispatchAddHotspot({
-      name: generateUniqueHotspotName(),
-      surface,
-    }));
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }
 
@@ -210,7 +224,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
             const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
             reduxStore.dispatch(
                 dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
-            reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+            reduxStore.dispatch(dispatchEnvironmentImage(unsafeUrl));
             reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
           }
     }
