@@ -16,7 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Object3D, Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -203,46 +203,22 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       // console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
-          if (this._zarboIosSrc && (format === 'glb' || format === 'gltf')) { // если это подмена
+          // if (!this.iosSrc && !this._zarboIosSrc) {
           // this.iosSrc = this._zarboAndroidSrc;
           // this._zarboIosSrc =  this._zarboAndroidSrc;
           // this._temp_src = this.src;
-            if (this._zarboIosSrc !== this.src) { // если подменяем на что-то другое(глб)
-              this.src = this._zarboIosSrc;
-              await this[$updateSource]()
-              await waitForEvent(this, 'load');
-              this[$openIOSARQuickLook]();
-    
-              setTimeout(() => {
-                this.src = this._zarbo3dSrc
-                this[$updateSource]()
-              }, 100);
-            } else { // если подмена, но это то же и в браузере
-              this[$openIOSARQuickLook]();
-            }
-          } else { // если usdz
-            this[$openIOSARQuickLook]();
-          }
-
+          // this.src = this._zarboAndroidSrc;
+          // }
+          this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
-          // this._temp_src = this.src
+          this._temp_src = this.src
           if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
             this.src = this._zarboAndroidSrc
             await this[$updateSource]()
             await waitForEvent(this, 'load');
             // zzzz
           }
-          // if ((this.src !== this._zarboAndroidSrc) && this._zarboAndroidSrc) {
-          //   this.src = this._zarboAndroidSrc
-          //   // await this[$triggerLoad]()
-          //   // await this[$updateSource]()
-          //   // await waitForEvent(this, 'load');
-          //   await this[$enterARWithWebXR]();
-          // } else {
-          //   await this[$enterARWithWebXR]();
-          // }
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
@@ -511,14 +487,14 @@ configuration or device capabilities');
       this[$arButtonContainer].classList.add('enabled');
     }
 
-    modelLoader(url: any): Promise<Object3D> {
-      let gltfLoader = new GLTFLoader()
+    // modelLoader(url: any): Promise<Object3D> {
+    //   let gltfLoader = new GLTFLoader()
 
-      return new Promise((resolve) => {
-        // @ts-ignore
-        gltfLoader.load(url, data => resolve(data));
-      });
-    }
+    //   return new Promise((resolve) => {
+    //     // @ts-ignore
+    //     gltfLoader.load(url, data => resolve(data));
+    //   });
+    // }
  
     async prepareUSDZ(): Promise<string> {
       const updateSourceProgress = this[$progressTracker].beginActivity();
