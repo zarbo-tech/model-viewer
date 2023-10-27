@@ -227,23 +227,23 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
           break;
         case ARMode.WEBXR:
-          this._temp_src = this.src
-          // if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
-          //   this.src = this._zarboAndroidSrc
-          //   await this[$updateSource]()
-          //   await waitForEvent(this, 'load');
-          //   // zzzz
-          // }
-          if ((this.src !== this._zarboAndroidSrc) && this._zarboAndroidSrc) {
+          // this._temp_src = this.src
+          if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
             this.src = this._zarboAndroidSrc
-            // await this[$triggerLoad]()
-            // await this[$updateSource]()
-            // await waitForEvent(this, 'load');
-            await this[$enterARWithWebXR]();
-          } else {
-            await this[$enterARWithWebXR]();
+            await this[$updateSource]()
+            await waitForEvent(this, 'load');
+            // zzzz
           }
-            // await this[$enterARWithWebXR]();
+          // if ((this.src !== this._zarboAndroidSrc) && this._zarboAndroidSrc) {
+          //   this.src = this._zarboAndroidSrc
+          //   // await this[$triggerLoad]()
+          //   // await this[$updateSource]()
+          //   // await waitForEvent(this, 'load');
+          //   await this[$enterARWithWebXR]();
+          // } else {
+          //   await this[$enterARWithWebXR]();
+          // }
+          await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
           this[$openSceneViewer]();
@@ -311,9 +311,14 @@ configuration or device capabilities');
     protected async[$enterARWithWebXR]() {
       console.log('Attempting to present in AR with WebXR...');
 
+      // if ((this.src !== this._zarboAndroidSrc) && this._zarboAndroidSrc) {
+      //   this.src = this._zarboAndroidSrc
+      // } 
+
       await this[$triggerLoad]();
 
       try {
+        console.log(this[$scene])
         this[$arButtonContainer].removeEventListener(
             'click', this[$onARButtonContainerClick]);
         const {arRenderer} = this[$renderer];
@@ -325,14 +330,14 @@ configuration or device capabilities');
         //   await this[$updateSource]()
         //   await waitForEvent(this, 'load');
         // }) // zzzz
-        this[$renderer].arRenderer.addEventListener('status', async res => {
-          // alert('я работаю')
-          if (res.status === 'session-end') { // мой кастомный эвенет
-            this.src = this._temp_src
-            await this[$updateSource]()
-            // await waitForEvent(this, 'load');
-          }
-        });
+        // this[$renderer].arRenderer.addEventListener('status', async res => {
+        //   // alert('я работаю')
+        //   if (res.status === 'session-end') { // мой кастомный эвенет
+        //     this.src = this._temp_src
+        //     await this[$updateSource]()
+        //     // await waitForEvent(this, 'load');
+        //   }
+        // });
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
@@ -344,7 +349,7 @@ configuration or device capabilities');
       } finally {
         // this.src = this._temp_src;
         this[$selectARMode]();
-        console.log("LOOOOGGGG:", this.src, this._zarboAndroidSrc);
+        // console.log("LOOOOGGGG:", this.src, this._zarboAndroidSrc);
       }
     }
 
