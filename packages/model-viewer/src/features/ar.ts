@@ -203,16 +203,37 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       // console.log(this[$scene]);
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          await this[$openIOSARQuickLook]();
+
+        console.log(this[$scene])
+
+          let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
+
+          if (this._zarboIosSrc && (format === 'glb' || format === 'gltf')) { // если это подмена
+            if (this._zarboIosSrc !== this.src) { // если подменяем на что-то другое(глб)
+              this.src = this._zarboIosSrc;
+              await this[$updateSource]()
+              await waitForEvent(this, 'load');
+              this[$openIOSARQuickLook]();
+
+              setTimeout(() => {
+                this.src = this._zarbo3dSrc
+                this[$updateSource]()
+              }, 100);
+            } else { // если подмена, но это то же и в браузере
+              this[$openIOSARQuickLook]();
+            }
+          } else { // если usdz
+            this[$openIOSARQuickLook]();
+          }
           break;
         case ARMode.WEBXR:
           this._temp_src = this.src
-          // if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
-          //   this.src = this._zarboAndroidSrc
-          //   await this[$updateSource]()
-          //   await waitForEvent(this, 'load');
-          //   // zzzz
-          // }
+          if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+            this.src = this._zarboAndroidSrc
+            await this[$updateSource]()
+            await waitForEvent(this, 'load');
+            // zzzz
+          }
           await this[$enterARWithWebXR]();
           break;
         case ARMode.SCENE_VIEWER:
@@ -281,14 +302,13 @@ configuration or device capabilities');
     protected async[$enterARWithWebXR]() {
       console.log('Attempting to present in AR with WebXR...');
 
-      if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
-        this.src = this._zarboAndroidSrc
-      } 
+      // if (this._zarboAndroidSrc && this.src !== this._zarboAndroidSrc) {
+      //   this.src = this._zarboAndroidSrc
+      // } 
 
       await this[$triggerLoad]();
 
       try {
-        console.log(this[$scene])
         this[$arButtonContainer].removeEventListener(
             'click', this[$onARButtonContainerClick]);
         const {arRenderer} = this[$renderer];
@@ -300,14 +320,14 @@ configuration or device capabilities');
         //   await this[$updateSource]()
         //   await waitForEvent(this, 'load');
         // }) // zzzz
-        // this[$renderer].arRenderer.addEventListener('status', async res => {
-        //   // alert('я работаю')
-        //   if (res.status === 'session-end') { // мой кастомный эвенет
-        //     this.src = this._temp_src
-        //     await this[$updateSource]()
-        //     // await waitForEvent(this, 'load');
-        //   }
-        // });
+        this[$renderer].arRenderer.addEventListener('status', async res => {
+          // alert('я работаю')
+          if (res.status === 'session-end') { // мой кастомный эвенет
+            this.src = this._temp_src
+            await this[$updateSource]()
+            // await waitForEvent(this, 'load');
+          }
+        });
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
@@ -344,14 +364,15 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       // const modelUrl = new URL(this.src!, location);
-      // let currentModel = '' 
-      // if (this._zarboAndroidSrc) {
-      //   currentModel = this._zarboAndroidSrc
-      // } else {
-      //   currentModel = this.src!
-      // }
+      let currentModel = '' 
+      if (this._zarboAndroidSrc) {
+        currentModel = this._zarboAndroidSrc
+      } else {
+        currentModel = this.src!
+      }
 
-      const modelUrl = new URL(this.src!, location);
+      const modelUrl = new URL(currentModel, location);
+      // const modelUrl = new URL(this.src!, location);
       if (modelUrl.hash)
         modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);

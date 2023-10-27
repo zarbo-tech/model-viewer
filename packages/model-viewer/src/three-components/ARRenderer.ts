@@ -48,13 +48,14 @@ const MIN_VIEWPORT_SCALE = 0.25;
 const MAX_DISTANCE = 10;
 
 export type ARStatus =
-    'not-presenting'|'session-started'|'object-placed'|'failed';
+    'not-presenting'|'session-started'|'object-placed'|'failed'|'session-end';
 
 export const ARStatus: {[index: string]: ARStatus} = {
   NOT_PRESENTING: 'not-presenting',
   SESSION_STARTED: 'session-started',
   OBJECT_PLACED: 'object-placed',
-  FAILED: 'failed'
+  FAILED: 'failed',
+  SESSION_END: 'session-end'
 };
 
 export interface ARStatusEvent extends ThreeEvent {
@@ -207,7 +208,7 @@ export class ARRenderer extends EventDispatcher<
     const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
-      // this.dispatchEvent({type: 'status', status: 'session-end'});
+      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_END});
       this.postSessionCleanup();
     }, {once: true});
 
