@@ -204,8 +204,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
 
-        console.log(this[$scene])
-
           let format = this._zarboIosSrc.split('.').splice(-1, 1)[0]
 
           if (this._zarboIosSrc && (format === 'glb' || format === 'gltf')) { // если это подмена
